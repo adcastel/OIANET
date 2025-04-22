@@ -24,6 +24,5 @@ class TinyCNN(BaseModel):
         ]
         super().__init__(layers)
 
-    def get_model(self):
-        return self.layers
+    
     

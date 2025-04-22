@@ -41,16 +41,17 @@ def evaluate(model, test_images, test_labels):
     for i in range(total):
         output = test_images[i:i+1]  # [1 x ...]
         start_time_b = time.time()
-        for layer in model:
-            layer_start_time = time.time()  # Start timer for the layer
-            output = layer.forward(output)
-            layer_time = time.time() - layer_start_time
-            images_per_second = 1.0 / layer_time
-            if i == 0:
-                print(f"Layer: {layer.__class__.__name__}, Time: {layer_time:.4f}s, Performance: {images_per_second:.2f} images/sec")
+        #for layer in model:
+        #    layer_start_time = time.time()  # Start timer for the layer
+        #    output = layer.forward(output)
+        #    layer_time = time.time() - layer_start_time
+        #    images_per_second = 1.0 / layer_time
+        #    if i == 0:
+        #        print(f"Layer: {layer.__class__.__name__}, Time: {layer_time:.4f}s, Performance: {images_per_second:.2f} images/sec")
+        output = model.forward(output, curr_iter=i)
         durationb = time.time() - start_time_b
         print("Time for eval pass:", durationb)
-
+        print("\n")
         # Use NumPy's argmax
         predicted = np.argmax(output[0])
         actual = np.argmax(test_labels[i])

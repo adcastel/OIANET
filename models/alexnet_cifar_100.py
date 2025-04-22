@@ -5,91 +5,38 @@ from modules.flatten import Flatten, Flatten_np
 from modules.dense import Dense, Dense_np
 from modules.softmax import Softmax, Softmax_np
 from modules.layer import Layer
+from models.basemodel import BaseModel
 
-
-class AlexNet_CIFAR100: 
+class AlexNet_CIFAR100(BaseModel): 
      def __init__(self, use_im2col=False):
          print("Building AlexNet for CIFAR-100")
-         self.layers = []
-
-         # Initial conv
-         self.layers.append(Conv2D_np(in_channels=3, out_channels=4, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
-         self.layers.append(ReLU_np())
-         self.layers.append(MaxPool2D_np(kernel_size=2, stride=2))  # 32x32 → 16x16
+         layers = [] 
+         layers.append(Conv2D_np(in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
+         layers.append(ReLU_np())
+         layers.append(MaxPool2D_np(kernel_size=2, stride=2))  # 32x32 → 16x16
          
-         self.layers.append(Conv2D_np(in_channels=64, out_channels=192, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
-         self.layers.append(ReLU_np())
-         self.layers.append(MaxPool2D_np(kernel_size=2, stride=2))  # 16x16 → 8x8
+         layers.append(Conv2D_np(in_channels=64, out_channels=192, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
+         layers.append(ReLU_np())
+         layers.append(MaxPool2D_np(kernel_size=2, stride=2))  # 16x16 → 8x8
          
-         self.layers.append(Conv2D_np(in_channels=192, out_channels=384, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
-         self.layers.append(ReLU_np())
+         layers.append(Conv2D_np(in_channels=192, out_channels=384, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
+         layers.append(ReLU_np())
 
-         self.layers.append(Conv2D_np(in_channels=384, out_channels=256, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
-         self.layers.append(ReLU_np())
+         layers.append(Conv2D_np(in_channels=384, out_channels=256, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
+         layers.append(ReLU_np())
 
-         self.layers.append(Conv2D_np(in_channels=256, out_channels=256, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
-         self.layers.append(ReLU_np())
-         self.layers.append(MaxPool2D_np(kernel_size=2, stride=2))  # 8x8 → 4x4
+         layers.append(Conv2D_np(in_channels=256, out_channels=256, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
+         layers.append(ReLU_np())
+         layers.append(MaxPool2D_np(kernel_size=2, stride=2))  # 8x8 → 4x4
 
-         self.layers.append(Flatten_np())
-         self.layers.append(Dense_np(256 * 4 * 4, 1024))
-         self.layers.append(ReLU_np())
+         layers.append(Flatten_np())
+         layers.append(Dense_np(256 * 4 * 4, 1024))
+         layers.append(ReLU_np())
          
-         self.layers.append(Dense_np(1024, 512))
-         self.layers.append(ReLU_np())
-         self.layers.append(Dense_np(512, 100))  # 100 classes for CIFAR-100
-         self.layers.append(Softmax_np())
+         layers.append(Dense_np(1024, 512))
+         layers.append(ReLU_np())
+         layers.append(Dense_np(512, 100))  # 100 classes for CIFAR-100
+         layers.append(Softmax_np())
 
-def build_alexnet_for_cifar100():
-    """
-         return [
-         Conv2D_np(in_channels=3, out_channels=4, kernel_size=3, stride=1, padding=1),
-         ReLU_np(),
-         MaxPool2D_np(kernel_size=2, stride=2),  # 32x32 → 16x16
+         super().__init__(layers)
 
-         Conv2D_np(in_channels=4, out_channels=8, kernel_size=3, stride=1, padding=1),
-         ReLU_np(),
-         MaxPool2D_np(kernel_size=2, stride=2),  # 16x16 → 8x8
-         Conv2D_np(in_channels=8, out_channels=16, kernel_size=3, stride=1, padding=1),
-         ReLU_np(),
-
-         Conv2D_np(in_channels=16, out_channels=8, kernel_size=3, stride=1, padding=1),
-         ReLU_np(),
-         Conv2D_np(in_channels=8, out_channels=8, kernel_size=3, stride=1, padding=1),
-         ReLU_np(),
-         MaxPool2D_np(kernel_size=2, stride=2),  # 8x8 → 4x4
-
-         Flatten_np(),
-         Dense_np(8 * 4 * 4, 1024),
-         ReLU_np(),
-         Dense_np(1024, 512),
-         ReLU_np(),
-         Dense_np(512, 100),  # 100 classes for CIFAR-100
-         Softmax_np()
-     ]
-    """
-    return [
-         Conv2D_np(in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=1),
-         ReLU_np(),
-         MaxPool2D_np(kernel_size=2, stride=2),  # 32x32 → 16x16
-         Conv2D_np(in_channels=64, out_channels=192, kernel_size=3, stride=1, padding=1),
-         ReLU_np(),
-         MaxPool2D_np(kernel_size=2, stride=2),  # 16x16 → 8x8
-         Conv2D_np(in_channels=192, out_channels=384, kernel_size=3, stride=1, padding=1),
-         ReLU_np(),
-
-         Conv2D_np(in_channels=384, out_channels=256, kernel_size=3, stride=1, padding=1),
-         ReLU_np(),
-
-         Conv2D_np(in_channels=256, out_channels=256, kernel_size=3, stride=1, padding=1),
-         ReLU_np(),
-         MaxPool2D_np(kernel_size=2, stride=2),  # 8x8 → 4x4
-
-         Flatten_np(),
-         Dense_np(256 * 4 * 4, 1024),
-         ReLU_np(),
-         Dense_np(1024, 512),
-         ReLU_np(),
-         Dense_np(512, 100),  # 100 classes for CIFAR-100
-         Softmax_np()
-    ]

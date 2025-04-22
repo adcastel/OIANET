@@ -1,10 +1,11 @@
 from data.cifar100 import load_cifar100, normalize_images, one_hot_encode
-from models.alexnet_cifar_100 import build_alexnet_for_cifar100
+from models.alexnet_cifar_100 import *
 from models.resnet18_cifar_100 import ResNet18_CIFAR100
 from models.tinycnn_cifar_100 import *
 from modules.train import train
 from modules.eval import evaluate
-model_name = 'TinyCNN'  # Change to 'AlexNet' or 'ResNet18' as needed
+model_name = 'AlexNet'  # Change to 'AlexNet' or 'ResNet18' as needed
+performance=True
 # Load and preprocess data
 (train_images, train_labels), (test_images, test_labels) = load_cifar100(data_dir='/Users/adcastel/RESEARCH/OIANET/data/cifar-100-python')
 train_images = normalize_images(train_images)
@@ -14,12 +15,13 @@ test_labels = one_hot_encode(test_labels)
 
 # Build and train model
 if model_name == 'AlexNet':
-    model = build_alexnet_for_cifar100()
+    model = AlexNet_CIFAR100(use_im2col=False)
 elif model_name == 'TinyCNN':
-    model = TinyCNN(use_im2col=False).get_model()
+    model = TinyCNN(use_im2col=False)
 else:
     model = ResNet18_CIFAR100(use_im2col=False)
-train(model, train_images, train_labels, epochs=10, batch_size=8, learning_rate=0.01, model_name=model_name)
+train(model, train_images, train_labels, epochs=1, batch_size=1, learning_rate=0.01, model_name=model_name, performance=performance)
 
 # Evaluate model
-evaluate(model, test_images, test_labels)
+if performance == False:
+    evaluate(model, test_images, test_labels)

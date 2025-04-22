@@ -36,8 +36,8 @@ import sys
 import time
 
 
-def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_rate=0.01, checkpoint_dir="checkpoints", model_name='AlexNet'):
-    num_samples = len(train_images)
+def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_rate=0.01, checkpoint_dir="checkpoints", model_name='AlexNet', performance=False):
+    num_samples = len(train_images) if performance == False else batch_size
     os.makedirs(checkpoint_dir, exist_ok=True)
 
     for epoch in range(epochs):
@@ -52,50 +52,33 @@ def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_
 
             # Forward
             output = batch_images
-            if model_name != 'ResNet18':
-                for layer in model:
-                    layer_start_time = time.time()  # Start timer for the layer
-                    output = layer.forward(output)
-                    layer_time = time.time() - layer_start_time
-                    images_per_second = batch_size / layer_time
-                    if i == 0:
-                        print(f"Layer: {layer.__class__.__name__}, Time: {layer_time:.4f}s, Performance: {images_per_second:.2f} images/sec")
-            else:
-                output = model.forward(batch_images, iter=i)
+           
+            output = model.forward(batch_images, curr_iter=i)
             # Loss + grad
             loss, grad = compute_loss_and_gradient(output, batch_labels)
             total_loss += loss
 
-            # Accuracy per batch
-            #batch_correct = sum(
-            #    out.index(max(out)) == label.index(1)
-            #    for out, label in zip(output, batch_labels)
-            #)
-            #correct += batch_correct
-            
-            
-            # Accuracy per batch
+                     # Accuracy per batch
             batch_correct = sum(
                 np.argmax(out) == np.argmax(label)
                 for out, label in zip(output, batch_labels)
             )
             correct += batch_correct
 
-            # Backward
-            for layer in reversed(model):
-                grad = layer.backward(grad, learning_rate)
-                if i == 0:
-                    print(f"Backward Layer: {layer.__class__.__name__}")
 
-            # Live progress bar with batch stats
-            batch_num = i // batch_size + 1
-            total_batches = (num_samples + batch_size - 1) // batch_size
-            sys.stdout.write(
-                f"\r[{batch_num}/{total_batches}] "
-                f"Loss: {loss:.4f} | "
-                f"Batch Acc: {100 * batch_correct / len(batch_images):.2f}%"
-            )
-            sys.stdout.flush()
+            if performance == False:
+               
+                #else:
+                grad = model.backward(grad, learning_rate,curr_iter=i) 
+                # Live progress bar with batch stats
+                batch_num = i // batch_size + 1
+                total_batches = (num_samples + batch_size - 1) // batch_size
+                sys.stdout.write(
+                    f"\r[{batch_num}/{total_batches}] "
+                    f"Loss: {loss:.4f} | "
+                    f"Batch Acc: {100 * batch_correct / len(batch_images):.2f}%"
+                )
+                sys.stdout.flush()
 
         duration = time.time() - start_time
         accuracy = correct / num_samples
