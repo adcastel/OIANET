@@ -5,6 +5,41 @@ from modules.flatten import Flatten, Flatten_np
 from modules.dense import Dense, Dense_np
 from modules.softmax import Softmax, Softmax_np
 from modules.layer import Layer
+
+
+class AlexNet_CIFAR100: 
+     def __init__(self, use_im2col=False):
+         print("Building AlexNet for CIFAR-100")
+         self.layers = []
+
+         # Initial conv
+         self.layers.append(Conv2D_np(in_channels=3, out_channels=4, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
+         self.layers.append(ReLU_np())
+         self.layers.append(MaxPool2D_np(kernel_size=2, stride=2))  # 32x32 → 16x16
+         
+         self.layers.append(Conv2D_np(in_channels=64, out_channels=192, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
+         self.layers.append(ReLU_np())
+         self.layers.append(MaxPool2D_np(kernel_size=2, stride=2))  # 16x16 → 8x8
+         
+         self.layers.append(Conv2D_np(in_channels=192, out_channels=384, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
+         self.layers.append(ReLU_np())
+
+         self.layers.append(Conv2D_np(in_channels=384, out_channels=256, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
+         self.layers.append(ReLU_np())
+
+         self.layers.append(Conv2D_np(in_channels=256, out_channels=256, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
+         self.layers.append(ReLU_np())
+         self.layers.append(MaxPool2D_np(kernel_size=2, stride=2))  # 8x8 → 4x4
+
+         self.layers.append(Flatten_np())
+         self.layers.append(Dense_np(256 * 4 * 4, 1024))
+         self.layers.append(ReLU_np())
+         
+         self.layers.append(Dense_np(1024, 512))
+         self.layers.append(ReLU_np())
+         self.layers.append(Dense_np(512, 100))  # 100 classes for CIFAR-100
+         self.layers.append(Softmax_np())
+
 def build_alexnet_for_cifar100():
     """
          return [

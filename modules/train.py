@@ -36,7 +36,7 @@ import sys
 import time
 
 
-def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_rate=0.01, checkpoint_dir="checkpoints"):
+def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_rate=0.01, checkpoint_dir="checkpoints", model_name='AlexNet'):
     num_samples = len(train_images)
     os.makedirs(checkpoint_dir, exist_ok=True)
 
@@ -52,14 +52,16 @@ def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_
 
             # Forward
             output = batch_images
-            for layer in model:
-                layer_start_time = time.time()  # Start timer for the layer
-                output = layer.forward(output)
-                layer_time = time.time() - layer_start_time
-                images_per_second = batch_size / layer_time
-                if i == 0:
-                    print(f"Layer: {layer.__class__.__name__}, Time: {layer_time:.4f}s, Performance: {images_per_second:.2f} images/sec")
-
+            if model_name != 'ResNet18':
+                for layer in model:
+                    layer_start_time = time.time()  # Start timer for the layer
+                    output = layer.forward(output)
+                    layer_time = time.time() - layer_start_time
+                    images_per_second = batch_size / layer_time
+                    if i == 0:
+                        print(f"Layer: {layer.__class__.__name__}, Time: {layer_time:.4f}s, Performance: {images_per_second:.2f} images/sec")
+            else:
+                output = model.forward(batch_images, iter=i)
             # Loss + grad
             loss, grad = compute_loss_and_gradient(output, batch_labels)
             total_loss += loss
