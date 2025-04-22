@@ -146,7 +146,7 @@ class Conv2D_np:
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
-        self.mode = 'direct' if use_im2col == True else 'im2col' # 'direct' or 'im2col'
+        self.mode = 'direct' if use_im2col == False else 'im2col' # 'direct' or 'im2col'
 
         self.kernels = np.random.uniform(-0.1, 0.1, 
                           (out_channels, in_channels, kernel_size, kernel_size)).astype(np.float32)
