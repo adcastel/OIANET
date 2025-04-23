@@ -49,3 +49,10 @@ class Dense(Layer):
         self.biases -= learning_rate * grad_biases
 
         return grad_input
+    
+    def get_weights(self):
+        return {'weights': self.weights, 'biases': self.biases}
+
+    def set_weights(self, weights):
+        self.weights = weights['weights']
+        self.biases = weights['biases']

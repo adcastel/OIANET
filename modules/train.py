@@ -36,9 +36,16 @@ import sys
 import time
 
 
-def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_rate=0.01, checkpoint_dir="checkpoints"):
+def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_rate=0.01,
+          save_path='saved_models', resume=False):
     num_samples = len(train_images)
-    os.makedirs(checkpoint_dir, exist_ok=True)
+    epoch = 0
+
+    if resume and os.path.exists(save_path):
+        print(f"Resuming training from {save_path} ...")
+        model.load_weights(save_path)
+    else:
+        print("Training from scratch.")
 
     for epoch in range(epochs):
         start_time = time.time()
@@ -51,39 +58,42 @@ def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_
             batch_labels = train_labels[i:i+batch_size]
 
             # Forward
-            output = batch_images
-           
-            output = model.forward(batch_images,curr_iter=i)
-            # Loss + grad
+            output = model.forward(batch_images, curr_iter=i)
+
+            # Loss + gradient
             loss, grad = compute_loss_and_gradient(output, batch_labels)
             total_loss += loss
 
-                     # Accuracy per batch
+            # Accuracy
             batch_correct = sum(
                 np.argmax(out) == np.argmax(label)
                 for out, label in zip(output, batch_labels)
             )
             correct += batch_correct
 
+            # Backward
+            grad = model.backward(grad, learning_rate, curr_iter=i) 
 
-               
-            grad = model.backward(grad, learning_rate,curr_iter=i) 
-            
+            # Logging
             batch_num = i // batch_size + 1
             total_batches = (num_samples + batch_size - 1) // batch_size
             sys.stdout.write(
-                    f"\r[{batch_num}/{total_batches}] "
-                    f"Loss: {loss:.4f} | "
-                    f"Batch Acc: {100 * batch_correct / len(batch_images):.2f}%"
+                f"\r[{batch_num}/{total_batches}] "
+                f"Loss: {loss:.4f} | "
+                f"Batch Acc: {100 * batch_correct / len(batch_images):.2f}%"
             )
             sys.stdout.flush()
 
+        # Epoch summary
         duration = time.time() - start_time
         accuracy = correct / num_samples
         ips = num_samples / duration
 
         print(f"\nEpoch Summary - Loss: {total_loss:.4f} | Acc: {accuracy * 100:.2f}% | IPS: {ips:.2f}")
 
-        # Save checkpoint
-        save_model(model, os.path.join(checkpoint_dir, f"epoch_{epoch + 1}.pkl"))
-        print(f"Checkpoint saved to {checkpoint_dir}/epoch_{epoch + 1}.pkl")
+        # Save weights
+        model.save_weights(save_path)
+        print(f"Model saved to {save_path}")
+
+
+

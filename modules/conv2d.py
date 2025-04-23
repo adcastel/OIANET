@@ -29,6 +29,13 @@ class Conv2D(Layer):
                           (out_channels, in_channels, kernel_size, kernel_size)).astype(np.float32)
         self.biases = np.zeros(out_channels, dtype=np.float32)
 
+    def get_weights(self):
+        return {'kernels': self.kernels, 'biases': self.biases}
+
+    def set_weights(self, weights):
+        self.kernels = weights['kernels']
+        self.biases = weights['biases']
+    
     def forward(self, input):
         self.input = input
         if self.mode == 'direct':

@@ -27,8 +27,8 @@ def main(model_name, batch_size, epochs, learning_rate, conv_algo, performance):
     if performance:
         perf(model, train_images, train_labels, batch_size=batch_size)
     else:
-        train(model, train_images, train_labels, epochs=epochs, batch_size=batch_size, learning_rate=learning_rate)
-
+        train(model, train_images, train_labels, epochs=epochs, batch_size=batch_size, learning_rate=learning_rate,
+              save_path=f'saved_models/{model_name}_weights', resume=False)
         evaluate(model, test_images, test_labels)
 
 if __name__ == '__main__':
