@@ -1,5 +1,5 @@
 from modules.layer import Layer
-import random
+from modules.utils import *
 
 import numpy as np
 
@@ -16,6 +16,14 @@ class Conv2D(Layer):
             self.mode = 'im2col' # 'direct' or 'im2col'
         else:
             self.mode = 'fused' # 'direct' or 'im2col'
+        self.mc = 480
+        self.nc = 3072
+        self.kc = 384
+        self.mr = 32
+        self.nr = 12
+        self.Ac = np.empty((self.mc, self.kc), dtype=np.float32)
+        self.Bc = np.empty((self.kc, self.nc), dtype=np.float32)
+
         self.kernels = np.random.uniform(-0.1, 0.1, 
                           (out_channels, in_channels, kernel_size, kernel_size)).astype(np.float32)
         self.biases = np.zeros(out_channels, dtype=np.float32)
@@ -237,13 +245,36 @@ class Conv2D(Layer):
         output = np.zeros((OC, fused_HW), dtype=np.float32)
 
         # GEMM 3-loop: output[oc, idx] = dot(kernel[oc], col[:, idx])
+        """
+        ORI
         for i in range(OC):
             for j in range(fused_HW):
                 sum_val = 0.0
                 for k in range(Ck2):
                     sum_val += kernel_matrix[i][k] * fused_cols[k][j]
                 output[i][j] = sum_val + self.biases[i]
+        
+        """
+        
+        #output = matmul_goto(self, fused_HW, Ck2, OC, fused_cols, kernel_matrix, output)
+        #for i in range(OC):
+        #    for j in range(fused_HW):
+        #        output[i][j] = output[i][j] + self.biases[i]
+        
+        
+        
+        # Mixed macro-kernel goto and micro-kernel Numpy
+        #output = matmul_goto_np(self, fused_HW, Ck2, OC, fused_cols, kernel_matrix, output)
+        #for i in range(OC):
+        #    for j in range(fused_HW):
+        #        output[i][j] = output[i][j] + self.biases[i]
 
+        # Numpy GEMM 
+        output += kernel_matrix @ fused_cols
+        for i in range(OC):
+            for j in range(fused_HW):
+                output[i][j] = output[i][j] + self.biases[i]
+        
         # Reshape back: [OC, B, HW] → [B, OC, OH, OW]
         output = output.reshape(OC, B, HW).transpose(1, 0, 2)
         out_h = (input.shape[2] - self.kernel_size + 2 * self.padding) // self.stride + 1
@@ -265,11 +296,13 @@ class Conv2D(Layer):
         cols_fused = self.cols.transpose(1, 0, 2).reshape(Ck2, B * OH * OW)  # [Ck², B*HW]
 
         # Compute grad_kernels and grad_cols using 3-loop GEMM-style
-        for i in range(OC):
-            for j in range(B * OH * OW):
-                for k in range(Ck2):
-                    grad_kernels[i][k] += grad_output_fused[i][j] * cols_fused[k][j]
-                    grad_cols[k][j] += kernel_matrix[i][k] * grad_output_fused[i][j]
+        #for i in range(OC):
+        #    for j in range(B * OH * OW):
+        #        for k in range(Ck2):
+        #            grad_kernels[i][k] += grad_output_fused[i][j] * cols_fused[k][j]
+        #            grad_cols[k][j] += kernel_matrix[i][k] * grad_output_fused[i][j]
+        grad_kernels += grad_output_fused @ cols_fused.T
+        grad_cols += kernel_matrix.T @ grad_output_fused
 
         # Compute grad_input from grad_cols
         grad_cols_batched = grad_cols.reshape(Ck2, B, OH * OW).transpose(1, 0, 2)  # [B, Ck², OH*OW]

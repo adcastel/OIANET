@@ -32,6 +32,8 @@ class BaseModel:
             grad_output = layer.backward(grad_output, learning_rate)
             layer_time = time.time() - layer_start_time
             if curr_iter == 0:
+                if layer_time == 0.0:
+                    layer_time = 1e-10
                 images_per_second =  imgs/ layer_time
                 print(f"{layer.__class__.__name__};{imgs};{layer_time:.4f};{images_per_second:.2f}")
         if curr_iter == 0:

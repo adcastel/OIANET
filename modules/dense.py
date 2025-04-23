@@ -1,5 +1,4 @@
-from modules.utils import matmul, vector_add, transpose
-import random
+from modules.utils import *
 from modules.layer import Layer
 
 import numpy as np
@@ -17,12 +16,9 @@ class Dense(Layer):
         batch_size = self.input.shape[0]
 
         output = np.zeros((batch_size, self.out_features),dtype=np.float32)
-        for i in range(batch_size):
-            for j in range(self.out_features):
-                for k in range(self.in_features):
-                    output[i][j] += self.input[i][k] * self.weights[k][j]
-                output[i][j] += self.biases[j]
-
+ 
+        #output = matmul_biasses(self.input, self.weights, output, self.biases)
+        output = self.input @  self.weights + self.biases  # Matrix multiplication and bias addition
         self.output = output
         return output
 
@@ -32,20 +28,21 @@ class Dense(Layer):
 
         # Gradient w.r.t. weights
         grad_weights = np.zeros((self.in_features, self.out_features),dtype=np.float32)
-        for i in range(self.in_features):
-            for j in range(self.out_features):
-                for b in range(batch_size):
-                    grad_weights[i][j] += self.input[b][i] * grad_output[b][j]
-
+        #for i in range(self.in_features):
+        #    for j in range(self.out_features):
+        #        for b in range(batch_size):
+        #            grad_weights[i][j] += self.input[b][i] * grad_output[b][j]
+        grad_weights += self.input.T @ grad_output
         # Gradient w.r.t. biases
         grad_biases = np.sum(grad_output, axis=0)
 
         # Gradient w.r.t. input
         grad_input = np.zeros((batch_size, self.in_features),dtype=np.float32)
-        for b in range(batch_size):
-            for i in range(self.in_features):
-                for j in range(self.out_features):
-                    grad_input[b][i] += grad_output[b][j] * self.weights[i][j]
+        #for b in range(batch_size):
+        #    for i in range(self.in_features):
+        #        for j in range(self.out_features):
+        #            grad_input[b][i] += grad_output[b][j] * self.weights[i][j]
+        grad_input += grad_output @ self.weights.T
 
         # Update weights and biases
         self.weights -= learning_rate * grad_weights

@@ -8,7 +8,7 @@ from modules.eval import evaluate
 from modules.performance import perf
 
 def main(model_name, batch_size, epochs, learning_rate, conv_algo, performance):
-    (train_images, train_labels), (test_images, test_labels) = load_cifar100(data_dir='/Users/adcastel/RESEARCH/OIANET/data/cifar-100-python')
+    (train_images, train_labels), (test_images, test_labels) = load_cifar100(data_dir='./data/cifar-100-python')
     train_images = normalize_images(train_images)
     test_images = normalize_images(test_images)
     train_labels = one_hot_encode(train_labels)
@@ -41,13 +41,13 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=10, help='Number of epochs for training (default: 10)')
     parser.add_argument('--learning_rate', type=float, default=0.01, help='Learning rate for training (default: 0.01)')
     parser.add_argument('--performance', action='store_true', help='Enable performance measurement')
-    parser.add_argument('--conv_ago', type=int, default=0, choices=[0,1,2], help='Conv2d algorithm 0-direct, 1-im2col, 2-im2colfused (default: 0)')
+    parser.add_argument('--conv_algo', type=int, default=0, choices=[0,1,2], help='Conv2d algorithm 0-direct, 1-im2col, 2-im2colfused (default: 0)')
     args = parser.parse_args()
     model_name = args.model
     batch_size = args.batch_size
     epochs = args.epochs
     learning_rate = args.learning_rate
     performance = args.performance
-    conv_algo = args.conv_ago
+    conv_algo = args.conv_algo
     
     main(model_name, batch_size, epochs, learning_rate, conv_algo, performance)
