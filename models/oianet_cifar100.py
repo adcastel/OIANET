@@ -8,18 +8,18 @@ from models.basemodel import BaseModel
 
 
 class OIANET_CIFAR100(BaseModel):
-    def __init__(self, use_im2col=False):
+    def __init__(self, conv_algo=0):
         print("Building OIANet for CIFAR-100")
         layers = [
-            Conv2D(3, 32, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col),
+            Conv2D(3, 32, kernel_size=3, stride=1, padding=1, conv_algo=conv_algo),
             ReLU(),
             MaxPool2D(kernel_size=2, stride=2),
 
-            Conv2D(32, 64, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col),
+            Conv2D(32, 64, kernel_size=3, stride=1, padding=1, conv_algo=conv_algo),
             ReLU(),
             MaxPool2D(kernel_size=2, stride=2),
 
-            Conv2D(64, 128, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col),
+            Conv2D(64, 128, kernel_size=3, stride=1, padding=1, conv_algo=conv_algo),
             ReLU(),
             MaxPool2D(kernel_size=2, stride=2),
 

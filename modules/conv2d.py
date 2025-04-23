@@ -4,14 +4,18 @@ import random
 import numpy as np
 
 class Conv2D(Layer):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, use_im2col=False):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, conv_algo=0):
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
-        self.mode = 'direct' if use_im2col == False else 'im2col' # 'direct' or 'im2col'
-
+        if conv_algo == 0:
+            self.mode = 'direct' 
+        elif conv_algo == 1: 
+            self.mode = 'im2col' # 'direct' or 'im2col'
+        else:
+            self.mode = 'fused' # 'direct' or 'im2col'
         self.kernels = np.random.uniform(-0.1, 0.1, 
                           (out_channels, in_channels, kernel_size, kernel_size)).astype(np.float32)
         self.biases = np.zeros(out_channels, dtype=np.float32)
@@ -22,6 +26,8 @@ class Conv2D(Layer):
             return self._forward_direct(input)
         elif self.mode == 'im2col':
             return self._forward_im2col(input)
+        elif self.mode == 'fused':
+            return self._forward_im2col_fused(input)
         else:
             raise ValueError("Mode must be 'direct' or 'im2col'")
 
@@ -30,6 +36,8 @@ class Conv2D(Layer):
             return self._backward_direct(grad_output, learning_rate)
         elif self.mode == 'im2col':
             return self._backward_im2col(grad_output, learning_rate)
+        elif self.mode == 'fused':
+            return self._backward_im2col_fused(grad_output, learning_rate)
         else:
             raise ValueError("Mode must be 'direct' or 'im2col'")
 
@@ -183,5 +191,95 @@ class Conv2D(Layer):
 
         if self.padding > 0:
             grad_input = grad_input_padded[:, :, self.padding:-self.padding, self.padding:-self.padding]
+
+        return grad_input
+    
+    # --- IM2COL WITH GEMM IMPLEMENTATION ---
+
+    def _col2im(self, cols, input_shape):
+        batch_size, in_c, in_h, in_w = input_shape
+        k = self.kernel_size
+        out_h = (in_h - k + 2 * self.padding) // self.stride + 1
+        out_w = (in_w - k + 2 * self.padding) // self.stride + 1
+
+        padded_h = in_h + 2 * self.padding
+        padded_w = in_w + 2 * self.padding
+        padded_input = np.zeros((batch_size, in_c, padded_h, padded_w), dtype=np.float32)
+
+        for b in range(batch_size):
+            col = 0
+            for i in range(out_h):
+                for j in range(out_w):
+                    patch = cols[b, :, col].reshape(in_c, k, k)
+                    padded_input[b, :, 
+                             i * self.stride:i * self.stride + k, 
+                             j * self.stride:j * self.stride + k] += patch
+                    col += 1
+
+        if self.padding > 0:
+            return padded_input[:, :, self.padding:-self.padding, self.padding:-self.padding]
+        return padded_input
+
+    
+    
+    def _forward_im2col_fused(self, input):
+        self.input = input
+        self.cols = self._im2col(input)  # [B, Ck², OH*OW]
+        B, Ck2, HW = self.cols.shape
+        OC = self.out_channels
+        kernel_matrix = self.kernels.reshape(OC, Ck2)
+
+        # Flatten batch into columns: B * HW
+        fused_HW = B * HW
+        fused_cols = self.cols.transpose(1, 0, 2).reshape(Ck2, fused_HW)
+
+        # Output will be [OC, B * HW]
+        output = np.zeros((OC, fused_HW), dtype=np.float32)
+
+        # GEMM 3-loop: output[oc, idx] = dot(kernel[oc], col[:, idx])
+        for i in range(OC):
+            for j in range(fused_HW):
+                sum_val = 0.0
+                for k in range(Ck2):
+                    sum_val += kernel_matrix[i][k] * fused_cols[k][j]
+                output[i][j] = sum_val + self.biases[i]
+
+        # Reshape back: [OC, B, HW] → [B, OC, OH, OW]
+        output = output.reshape(OC, B, HW).transpose(1, 0, 2)
+        out_h = (input.shape[2] - self.kernel_size + 2 * self.padding) // self.stride + 1
+        out_w = (input.shape[3] - self.kernel_size + 2 * self.padding) // self.stride + 1
+        return output.reshape(B, OC, out_h, out_w)
+
+    def _backward_im2col_fused(self, grad_output, learning_rate):
+        B, OC, OH, OW = grad_output.shape
+        grad_output = grad_output.reshape(B, OC, OH * OW)  # [B, OC, HW]
+        grad_output_fused = grad_output.transpose(1, 0, 2).reshape(OC, B * OH * OW)  # [OC, B*HW]
+
+        Ck2 = self.kernels.shape[1] * self.kernels.shape[2] * self.kernels.shape[3]  # C * K * K
+        IC = self.kernels.shape[1]
+
+        kernel_matrix = self.kernels.reshape(OC, Ck2)
+        grad_kernels = np.zeros_like(kernel_matrix, dtype=np.float32)
+        grad_cols = np.zeros((Ck2, B * OH * OW), dtype=np.float32)
+
+        cols_fused = self.cols.transpose(1, 0, 2).reshape(Ck2, B * OH * OW)  # [Ck², B*HW]
+
+        # Compute grad_kernels and grad_cols using 3-loop GEMM-style
+        for i in range(OC):
+            for j in range(B * OH * OW):
+                for k in range(Ck2):
+                    grad_kernels[i][k] += grad_output_fused[i][j] * cols_fused[k][j]
+                    grad_cols[k][j] += kernel_matrix[i][k] * grad_output_fused[i][j]
+
+        # Compute grad_input from grad_cols
+        grad_cols_batched = grad_cols.reshape(Ck2, B, OH * OW).transpose(1, 0, 2)  # [B, Ck², OH*OW]
+        grad_input = self._col2im(grad_cols_batched, self.input.shape)
+
+        # Bias gradient: sum over all gradients per output channel
+        grad_biases = np.sum(grad_output_fused, axis=1)  # [OC]
+
+        # Update parameters
+        self.kernels -= learning_rate * grad_kernels.reshape(self.kernels.shape)
+        self.biases -= learning_rate * grad_biases
 
         return grad_input

@@ -6,18 +6,18 @@ from modules.softmax import Softmax
 from modules.avgpool2d import GlobalAvgPool2D
 import time
 class BasicBlock:
-    def __init__(self, in_channels, out_channels, stride=1, use_im2col=False):
+    def __init__(self, in_channels, out_channels, stride=1, conv_algo=0):
     
         self.use_projection = (in_channels != out_channels) or (stride != 1)
         self.stride = stride
 
-        self.conv1 = Conv2D(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, use_im2col=use_im2col)
+        self.conv1 = Conv2D(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, conv_algo=conv_algo)
         self.relu1 = ReLU()
-        self.conv2 = Conv2D(out_channels, out_channels, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col)
+        self.conv2 = Conv2D(out_channels, out_channels, kernel_size=3, stride=1, padding=1, conv_algo=conv_algo)
         self.relu2 = ReLU()
 
         if self.use_projection:
-            self.projection = Conv2D(in_channels, out_channels, kernel_size=1, stride=stride, padding=0, use_im2col=use_im2col)
+            self.projection = Conv2D(in_channels, out_channels, kernel_size=1, stride=stride, padding=0, conv_algo=conv_algo)
         else:
             self.projection = None
         self.first=True
@@ -90,19 +90,19 @@ class BasicBlock:
 
 
 class ResNet18_CIFAR100:
-    def __init__(self, use_im2col=False):
+    def __init__(self, conv_algo=0):
         print("Building ResNet18 for CIFAR-100")
         self.layers = []
 
         # Initial conv
-        self.layers.append(Conv2D(3, 64, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
+        self.layers.append(Conv2D(3, 64, kernel_size=3, stride=1, padding=1, conv_algo=conv_algo))
         self.layers.append(ReLU())
 
         # Residual blocks
-        self._make_layer(64, 64, 2, stride=1, use_im2col=use_im2col)
-        self._make_layer(64, 128, 2, stride=2, use_im2col=use_im2col)
-        self._make_layer(128, 256, 2, stride=2, use_im2col=use_im2col)
-        self._make_layer(256, 512, 2, stride=2, use_im2col=use_im2col)
+        self._make_layer(64, 64, 2, stride=1, conv_algo=conv_algo)
+        self._make_layer(64, 128, 2, stride=2, conv_algo=conv_algo)
+        self._make_layer(128, 256, 2, stride=2, conv_algo=conv_algo)
+        self._make_layer(256, 512, 2, stride=2, conv_algo=conv_algo)
 
         # Global average pooling
         self.layers.append(GlobalAvgPool2D())
@@ -112,10 +112,10 @@ class ResNet18_CIFAR100:
         self.layers.append(Dense(512, 100))
         self.layers.append(Softmax())
 
-    def _make_layer(self, in_channels, out_channels, blocks, stride, use_im2col):
+    def _make_layer(self, in_channels, out_channels, blocks, stride, conv_algo=0):
         strides = [stride] + [1] * (blocks - 1)
         for s in strides:
-            block = BasicBlock(in_channels, out_channels, s, use_im2col=use_im2col)
+            block = BasicBlock(in_channels, out_channels, s, conv_algo=conv_algo)
             self.layers.append(block)
             in_channels = out_channels  # For next block
 

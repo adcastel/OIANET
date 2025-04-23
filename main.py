@@ -7,7 +7,7 @@ from modules.train import train
 from modules.eval import evaluate
 from modules.performance import perf
 
-def main(model_name, batch_size, epochs, learning_rate, performance):
+def main(model_name, batch_size, epochs, learning_rate, conv_algo, performance):
     (train_images, train_labels), (test_images, test_labels) = load_cifar100(data_dir='/Users/adcastel/RESEARCH/OIANET/data/cifar-100-python')
     train_images = normalize_images(train_images)
     test_images = normalize_images(test_images)
@@ -16,13 +16,13 @@ def main(model_name, batch_size, epochs, learning_rate, performance):
 
     # Build and train model
     if model_name == 'AlexNet':
-        model = AlexNet_CIFAR100(use_im2col=False)
+        model = AlexNet_CIFAR100(conv_algo=conv_algo)
     elif model_name == 'TinyCNN':
-        model = TinyCNN(use_im2col=False)
+        model = TinyCNN(conv_algo=conv_algo)
     elif model_name == 'OIANet':
-        model = OIANET_CIFAR100(use_im2col=True)
+        model = OIANET_CIFAR100(conv_algo=conv_algo)
     else:
-        model = ResNet18_CIFAR100(use_im2col=False)
+        model = ResNet18_CIFAR100(conv_algo=conv_algo)
 
     if performance:
         perf(model, train_images, train_labels, batch_size=batch_size)
@@ -41,11 +41,13 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=10, help='Number of epochs for training (default: 10)')
     parser.add_argument('--learning_rate', type=float, default=0.01, help='Learning rate for training (default: 0.01)')
     parser.add_argument('--performance', action='store_true', help='Enable performance measurement')
+    parser.add_argument('--conv_ago', type=int, default=0, choices=[0,1,2], help='Conv2d algorithm 0-direct, 1-im2col, 2-im2colfused (default: 0)')
     args = parser.parse_args()
     model_name = args.model
     batch_size = args.batch_size
     epochs = args.epochs
     learning_rate = args.learning_rate
     performance = args.performance
+    conv_algo = args.conv_ago
     
-    main(model_name, batch_size, epochs, learning_rate, performance)
+    main(model_name, batch_size, epochs, learning_rate, conv_algo, performance)
