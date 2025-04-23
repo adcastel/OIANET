@@ -1,11 +1,9 @@
-from modules.conv2d import Conv2D, Conv2D_np
-from modules.relu import ReLU, ReLU_np
-from modules.maxpool2d import MaxPool2D, MaxPool2D_np
-from modules.flatten import Flatten, Flatten_np
-from modules.dense import Dense, Dense_np
-from modules.softmax import Softmax, Softmax_np
+from modules.conv2d import Conv2D
+from modules.relu import ReLU
+from modules.flatten import Flatten
+from modules.dense import Dense
+from modules.softmax import Softmax
 from modules.avgpool2d import GlobalAvgPool2D
-from modules.layer import Layer
 import time
 class BasicBlock:
     def __init__(self, in_channels, out_channels, stride=1, use_im2col=False):
@@ -13,13 +11,13 @@ class BasicBlock:
         self.use_projection = (in_channels != out_channels) or (stride != 1)
         self.stride = stride
 
-        self.conv1 = Conv2D_np(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, use_im2col=use_im2col)
-        self.relu1 = ReLU_np()
-        self.conv2 = Conv2D_np(out_channels, out_channels, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col)
-        self.relu2 = ReLU_np()
+        self.conv1 = Conv2D(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, use_im2col=use_im2col)
+        self.relu1 = ReLU()
+        self.conv2 = Conv2D(out_channels, out_channels, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col)
+        self.relu2 = ReLU()
 
         if self.use_projection:
-            self.projection = Conv2D_np(in_channels, out_channels, kernel_size=1, stride=stride, padding=0, use_im2col=use_im2col)
+            self.projection = Conv2D(in_channels, out_channels, kernel_size=1, stride=stride, padding=0, use_im2col=use_im2col)
         else:
             self.projection = None
         self.first=True
@@ -97,8 +95,8 @@ class ResNet18_CIFAR100:
         self.layers = []
 
         # Initial conv
-        self.layers.append(Conv2D_np(3, 64, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
-        self.layers.append(ReLU_np())
+        self.layers.append(Conv2D(3, 64, kernel_size=3, stride=1, padding=1, use_im2col=use_im2col))
+        self.layers.append(ReLU())
 
         # Residual blocks
         self._make_layer(64, 64, 2, stride=1, use_im2col=use_im2col)
@@ -110,9 +108,9 @@ class ResNet18_CIFAR100:
         self.layers.append(GlobalAvgPool2D())
 
         # Flatten + Dense
-        self.layers.append(Flatten_np())
-        self.layers.append(Dense_np(512, 100))
-        self.layers.append(Softmax_np())
+        self.layers.append(Flatten())
+        self.layers.append(Dense(512, 100))
+        self.layers.append(Softmax())
 
     def _make_layer(self, in_channels, out_channels, blocks, stride, use_im2col):
         strides = [stride] + [1] * (blocks - 1)

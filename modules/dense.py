@@ -1,63 +1,10 @@
 from modules.utils import matmul, vector_add, transpose
 import random
 from modules.layer import Layer
-"""
-class Dense:
-    def __init__(self, in_features, out_features):
-        self.weights = [[random.uniform(-0.1, 0.1) for _ in range(out_features)] for _ in range(in_features)]
-        self.biases = [0.0 for _ in range(out_features)]
-        self.input = None
-
-    def forward(self, input):
-        
-        self.input = input  # [batch_size][in_features]
-        
-        out = matmul(input, self.weights)  # [batch_size x out_features]
-        self.output = vector_add(out, [self.biases for _ in range(len(input))])
-        return self.output
-"""
-class Dense(Layer):
-    def __init__(self, in_features, out_features):
-        self.weights = [[random.gauss(0, 1 / in_features**0.5) for _ in range(out_features)] for _ in range(in_features)]
-        self.biases = [0 for _ in range(out_features)]
-        self.input = None
-
-    def forward(self, input):
-        self.input = input  # input is [batch_size x in_features]
-        #print(f"Input shape: {len(input)} x {len(input[0])}")
-        #print(input)
-        #print(f"Weights shape: {len(self.weights)} x {len(self.weights[0])}")
-        self.output = matmul(input, self.weights)
-        for i in range(len(self.output)):
-            for j in range(len(self.output[0])):
-                self.output[i][j] += self.biases[j]
-        return self.output
-
-    def backward(self, grad_output, learning_rate):
-        # grad_output: [batch_size x out_features]
-        input_T = transpose(self.input)  # [in_features x batch_size]
-        grad_weights = matmul(input_T, grad_output)  # [in_features x out_features]
-
-        grad_biases = [0 for _ in self.biases]
-        for row in grad_output:
-            for i, val in enumerate(row):
-                grad_biases[i] += val
-
-        grad_input = matmul(grad_output, transpose(self.weights))  # [batch_size x in_features]
-
-        for i in range(len(self.weights)):
-            for j in range(len(self.weights[0])):
-                self.weights[i][j] -= learning_rate * grad_weights[i][j]
-
-        for i in range(len(self.biases)):
-            self.biases[i] -= learning_rate * grad_biases[i]
-
-        return grad_input
-    
 
 import numpy as np
 
-class Dense_np(Layer):
+class Dense(Layer):
     def __init__(self, in_features, out_features):
         self.in_features = in_features
         self.out_features = out_features

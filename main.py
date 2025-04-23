@@ -25,7 +25,7 @@ else:
     model = ResNet18_CIFAR100(use_im2col=False)
 bs = [8]
 for b in bs:
-    train(model, train_images, train_labels, epochs=1, batch_size=b, learning_rate=0.01, model_name=model_name, performance=performance)
+    train(model, train_images, train_labels, epochs=10, batch_size=b, learning_rate=0.01, model_name=model_name, performance=performance)
 
 # Evaluate model
 if performance == False:
