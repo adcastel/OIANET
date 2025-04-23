@@ -1,5 +1,6 @@
 from modules.layer import Layer
 from modules.utils import *
+from cython_modules.im2col import im2col_forward_cython
 
 import numpy as np
 
@@ -118,6 +119,7 @@ class Conv2D(Layer):
     # --- IM2COL IMPLEMENTATION ---
 
     def _im2col(self, input):
+        return im2col_forward_cython(input, self.kernel_size, self.stride, self.padding)
         batch_size, in_c, in_h, in_w = input.shape
         k = self.kernel_size
         out_h = (in_h - k + 2 * self.padding) // self.stride + 1

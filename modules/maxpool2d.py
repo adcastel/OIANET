@@ -1,5 +1,5 @@
 from modules.layer import Layer
-
+from cython_modules.maxpool2d import maxpool_forward_cython
 import numpy as np
 
 class MaxPool2D(Layer):
@@ -8,6 +8,9 @@ class MaxPool2D(Layer):
         self.stride = stride
 
     def forward(self, input):  # input: np.ndarray of shape [B, C, H, W]
+        self.input = input
+        output, self.max_indices = maxpool_forward_cython(input,self.kernel_size,self.stride)
+        return output
         self.input = input
         B, C, H, W = input.shape
         KH, KW = self.kernel_size, self.kernel_size
