@@ -1,8 +1,16 @@
 import time
 import sys 
 import numpy as np
-
-def evaluate(model, test_images, test_labels):
+import os
+def evaluate(model, test_images, test_labels,save_path):
+    
+    if os.path.exists(save_path):
+        print(f"Loading model from {save_path} ...")
+        model.load_weights(save_path)
+    else:
+        print("Model not found. Please train the model first.")
+        return
+    
     start_time = time.time()
     correct = 0
     total = len(test_images)
