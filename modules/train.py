@@ -38,6 +38,8 @@ import time
 
 def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_rate=0.01,
           save_path='saved_models', resume=False):
+    old_acc = 0.0
+    no_improv = 0
     num_samples = len(train_images)
     epoch = 0
 
@@ -89,11 +91,21 @@ def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_
         accuracy = correct / num_samples
         ips = num_samples / duration
 
-        print(f"\nEpoch Summary - Loss: {total_loss:.4f} | Acc: {accuracy * 100:.2f}% | IPS: {ips:.2f}")
+        
 
-        # Save weights
-        model.save_weights(save_path)
-        print(f"Model saved to {save_path}")
+        print(f"\nEpoch Summary - Loss: {total_loss:.4f} | Acc: {accuracy * 100:.2f}% | IPS: {ips:.2f}")
+        
+        if accuracy > old_acc:
+            old_acc = accuracy
+            # Save weights
+            model.save_weights(save_path)
+            print(f"Model saved to {save_path}")
+            no_improv = 0
+        else:
+            no_improv += 1
+            if no_improv >= 5:
+                print("Early stopping due to no improvement.")
+                break
 
 
 

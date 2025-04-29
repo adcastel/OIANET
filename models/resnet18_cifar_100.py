@@ -119,20 +119,19 @@ class ResNet18_CIFAR100:
             self.layers.append(block)
             in_channels = out_channels  # For next block
 
-    def forward(self, x, iter=1):
+    def forward(self, x, curr_iter=1):
         for layer in self.layers:
             layer_start_time = time.time()  # Start timer for the layer
             x = layer.forward(x)
             layer_time = time.time() - layer_start_time
-            if iter == 0 and layer.__class__.__name__ != 'BasicBlock':
+            if curr_iter == 0 and layer.__class__.__name__ != 'BasicBlock':
                 # Only print for the first iteration
-                batch_size = x.shape[0]
                 # Calculate performance
                 images_per_second = x.shape[0] / layer_time
                 print(f"Layer: {layer.__class__.__name__}, Time: {layer_time:.4f}s, Performance: {images_per_second:.2f} images/sec")
         return x
 
-    def backward(self, grad_output, learning_rate):
+    def backward(self, grad_output, learning_rate, curr_iter=1):
         for layer in reversed(self.layers):
             grad_output = layer.backward(grad_output, learning_rate)
         return grad_output

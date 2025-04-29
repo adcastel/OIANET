@@ -8,9 +8,9 @@ class ReLU(Layer):
     def __init__(self):
         self.input = None
 
-    def forward(self, input):
-        self.input = input
-        return np.maximum(0, input)
+    def forward(self, x):
+        self.input = np.array(x, dtype=np.float32)  # ensure NumPy array
+        return np.maximum(0, self.input)
 
-    def backward(self, grad_output, learning_rate):
+    def backward(self, grad_output, learning_rate=None):
         return grad_output * (self.input > 0)
