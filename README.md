@@ -25,6 +25,14 @@ OIANET is a deep learning framework designed to train and evaluate convolutional
    ```
 ## Usage
 
+The arguments for launching are:
+- **--model**: Model to evaluate. Currently supported: `AlexNet`, `TinyCNN`, `OIANet`, `ResNet18` (default:`OIANet`)
+- **--batch_size**: Batch size for training (default: 8)
+- **--epochs**: Number of epochs for training (default: 10)
+- **--learning_rate**: Learning rate for training (default: 0.01)
+- **--performance**: Enable performance measurement
+- **--eval_only**: Enable evaluation-only mode
+- **--conv_algo**: Conv2d algorithm 0-direct, 1-im2col, 2-im2colfused (default: 0)
 
 
 To train a model on the CIFAR-100 dataset, use the following command:
