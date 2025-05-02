@@ -8,7 +8,7 @@ class BaseModel:
     def get_model(self):
         return self.layers
 
-    def forward(self, x, curr_iter=1):
+    def forward(self, x, curr_iter=1,training=False):
         imgs=x.shape[0]
         if curr_iter == 0:
             print("FW Layer;Batch;Time(s);Performance(imgs/s)")

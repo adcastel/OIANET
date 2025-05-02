@@ -2,14 +2,15 @@ import time
 import sys 
 import numpy as np
 import os
-def evaluate(model, test_images, test_labels,save_path):
+def evaluate(model, test_images, test_labels,save_path,load_model=True):
     
-    if os.path.exists(save_path):
-        print(f"Loading model from {save_path} ...")
-        model.load_weights(save_path)
-    else:
-        print("Model not found. Please train the model first.")
-        return
+    if load_model:
+        if os.path.exists(save_path):
+            print(f"Loading model from {save_path} ...")
+            model.load_weights(save_path)
+        else:
+            print("Model not found. Please train the model first.")
+            return
     
     start_time = time.time()
     correct = 0
@@ -35,3 +36,4 @@ def evaluate(model, test_images, test_labels,save_path):
     ips = total / duration
 
     print(f"\nEvaluation Results - Accuracy: {accuracy * 100:.2f}% | IPS: {ips:.2f}")
+    return accuracy, ips

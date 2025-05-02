@@ -8,7 +8,7 @@ class ReLU(Layer):
     def __init__(self):
         self.input = None
 
-    def forward(self, x):
+    def forward(self, x, training=True):
         self.input = np.array(x, dtype=np.float32)  # ensure NumPy array
         return np.maximum(0, self.input)
 

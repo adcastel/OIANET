@@ -7,7 +7,7 @@ class MaxPool2D(Layer):
         self.kernel_size = kernel_size
         self.stride = stride
 
-    def forward(self, input):  # input: np.ndarray of shape [B, C, H, W]
+    def forward(self, input, training=True):  # input: np.ndarray of shape [B, C, H, W]
         self.input = input
         output, self.max_indices = maxpool_forward_cython(input,self.kernel_size,self.stride)
         return output

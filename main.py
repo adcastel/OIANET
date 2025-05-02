@@ -29,9 +29,9 @@ def main(model_name, batch_size, epochs, learning_rate, conv_algo, performance, 
     else:
         if eval_only == False:
             train(model, train_images, train_labels, epochs=epochs, batch_size=batch_size, learning_rate=learning_rate,
-              save_path=f'saved_models/{model_name}', resume=True)
-        
-        evaluate(model, test_images, test_labels, save_path=f'saved_models/{model_name}')
+              save_path=f'saved_models/{model_name}', resume=True, test_images=test_images, test_labels=test_labels)
+        else:
+            _,_ = evaluate(model, test_images, test_labels, save_path=f'saved_models/{model_name}')
 
 if __name__ == '__main__':
 

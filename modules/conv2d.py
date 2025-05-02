@@ -36,7 +36,7 @@ class Conv2D(Layer):
         self.kernels = weights['kernels']
         self.biases = weights['biases']
     
-    def forward(self, input):
+    def forward(self, input, training=True):
         self.input = input
         if self.mode == 'direct':
             return self._forward_direct(input)

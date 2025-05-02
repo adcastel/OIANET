@@ -11,7 +11,7 @@ class Dense(Layer):
         self.biases = np.zeros(out_features,dtype=np.float32)
         self.input = None
 
-    def forward(self, input):  # input: [batch_size x in_features]
+    def forward(self, input, training=True):  # input: [batch_size x in_features]
         self.input = np.array(input).astype(np.float32)  # Ensure input is float for numerical stability
         batch_size = self.input.shape[0]
 

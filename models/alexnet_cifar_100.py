@@ -4,6 +4,7 @@ from modules.maxpool2d import MaxPool2D
 from modules.flatten import Flatten
 from modules.dense import Dense
 from modules.softmax import Softmax
+from modules.batchnorm import BatchNorm2D
 from models.basemodel import BaseModel
 
 class AlexNet_CIFAR100(BaseModel): 
@@ -11,20 +12,25 @@ class AlexNet_CIFAR100(BaseModel):
          print("Building AlexNet for CIFAR-100")
          layers = [] 
          layers.append(Conv2D(in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=1, conv_algo=conv_algo))
+         layers.append(BatchNorm2D(64))
          layers.append(ReLU())
          layers.append(MaxPool2D(kernel_size=2, stride=2))  # 32x32 → 16x16
          
          layers.append(Conv2D(in_channels=64, out_channels=192, kernel_size=3, stride=1, padding=1, conv_algo=conv_algo))
+         layers.append(BatchNorm2D(192))
          layers.append(ReLU())
          layers.append(MaxPool2D(kernel_size=2, stride=2))  # 16x16 → 8x8
          
          layers.append(Conv2D(in_channels=192, out_channels=384, kernel_size=3, stride=1, padding=1, conv_algo=conv_algo))
+         layers.append(BatchNorm2D(384))
          layers.append(ReLU())
 
          layers.append(Conv2D(in_channels=384, out_channels=256, kernel_size=3, stride=1, padding=1, conv_algo=conv_algo))
+         layers.append(BatchNorm2D(256))
          layers.append(ReLU())
 
          layers.append(Conv2D(in_channels=256, out_channels=256, kernel_size=3, stride=1, padding=1, conv_algo=conv_algo))
+         layers.append(BatchNorm2D(256))
          layers.append(ReLU())
          layers.append(MaxPool2D(kernel_size=2, stride=2))  # 8x8 → 4x4
 

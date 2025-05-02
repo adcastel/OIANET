@@ -25,8 +25,8 @@ class GlobalAvgPool2D(Layer):
 
     def __init__(self):
         self.input = None
-        
-    def forward(self, x):  # shape: [batch, channels, h, w]
+
+    def forward(self, x, training=True):  # shape: [batch, channels, h, w]
         self.input = x
         return np.mean(x, axis=(2, 3), keepdims=False).astype(np.float32)  # shape: [batch, channels]
 

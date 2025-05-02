@@ -4,7 +4,7 @@ from modules.layer import Layer
 import numpy as np
 
 class Softmax(Layer):
-    def forward(self, input):  # input: [batch_size x num_classes]
+    def forward(self, input, training=True):  # input: [batch_size x num_classes]
         input = np.array(input).astype(dtype=np.float32)  # Ensure input is float for numerical stability
         self.output = np.zeros_like(input,np.float32)
 

@@ -5,6 +5,7 @@ from modules.flatten import Flatten
 from modules.dense import Dense
 from modules.softmax import Softmax
 from models.basemodel import BaseModel
+from modules.batchnorm import BatchNorm2D
 
 
 class OIANET_CIFAR100(BaseModel):
@@ -12,14 +13,17 @@ class OIANET_CIFAR100(BaseModel):
         print("Building OIANet for CIFAR-100")
         layers = [
             Conv2D(3, 32, kernel_size=3, stride=1, padding=1, conv_algo=conv_algo),
+            BatchNorm2D(32),
             ReLU(),
             MaxPool2D(kernel_size=2, stride=2),
 
             Conv2D(32, 64, kernel_size=3, stride=1, padding=1, conv_algo=conv_algo),
+            BatchNorm2D(64),
             ReLU(),
             MaxPool2D(kernel_size=2, stride=2),
 
             Conv2D(64, 128, kernel_size=3, stride=1, padding=1, conv_algo=conv_algo),
+            BatchNorm2D(128),
             ReLU(),
             MaxPool2D(kernel_size=2, stride=2),
 

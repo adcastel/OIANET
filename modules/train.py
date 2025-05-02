@@ -4,6 +4,7 @@ import time
 import numpy as np
 import pickle
 import os
+from modules.eval import evaluate
 
 def save_model(model, filename='model_checkpoint.pkl'):
     with open(filename, 'wb') as f:
@@ -37,7 +38,7 @@ import time
 
 
 def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_rate=0.01,
-          save_path='saved_models', resume=False):
+          save_path='saved_models', resume=False, test_images=None, test_labels=None):
     old_acc = 0.0
     no_improv = 0
     num_samples = len(train_images)
@@ -60,7 +61,7 @@ def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_
             batch_labels = train_labels[i:i+batch_size]
 
             # Forward
-            output = model.forward(batch_images, curr_iter=i)
+            output = model.forward(batch_images, curr_iter=99)
 
             # Loss + gradient
             loss, grad = compute_loss_and_gradient(output, batch_labels)
@@ -74,7 +75,7 @@ def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_
             correct += batch_correct
 
             # Backward
-            grad = model.backward(grad, learning_rate, curr_iter=i) 
+            grad = model.backward(grad, learning_rate, curr_iter=99) 
 
             # Logging
             batch_num = i // batch_size + 1
@@ -95,8 +96,9 @@ def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_
 
         print(f"\nEpoch Summary - Loss: {total_loss:.4f} | Acc: {accuracy * 100:.2f}% | IPS: {ips:.2f}")
         
-        if accuracy > old_acc:
-            old_acc = accuracy
+        eacc, _ = evaluate(model, test_images, test_labels, save_path=save_path, load_model=False)
+        if eacc > old_acc:
+            old_acc = eacc
             # Save weights
             model.save_weights(save_path)
             print(f"Model saved to {save_path}")
