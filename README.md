@@ -5,7 +5,7 @@ OIANET is a deep learning framework designed to train and evaluate convolutional
 ## Features
 
 - **Predefined Models**: Includes implementations of AlexNet, TinyCNN, ResNet18, and OIANet for CIFAR-100.
-- **Custom Layers**: Modular implementation of layers such as `Conv2D`, `ReLU`, `MaxPool2D`, `GlobalAvgPool2D`, `Dense`, `Flatten`, and `Softmax`.
+- **Custom Layers**: Modular implementation of layers such as `Conv2D`, `ReLU`, `BatchNorm`, `MaxPool2D`, `GlobalAvgPool2D`, `Dense`, `Flatten`, and `Softmax`.
 - **Training and Evaluation**: Built-in support for training models and evaluating their performance.
 - **Performance Analysis**: Tools to measure and analyze model performance.
 - **Cython Optimization**: Optimized convolution and pooling operations using Cython for improved performance.
@@ -50,7 +50,7 @@ To evaluate a trained model accuracy:
 python main.py --model <model_name> --batch_size <batch_size> --eval_only
 ```
 
-To evaluate a model performance
+To evaluate a model performance:
 ```bash
 python main.py --model <model_name> --batch_size <batch_size> --performance
 ```
