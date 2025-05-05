@@ -51,6 +51,13 @@ def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_
         print("Training from scratch.")
 
     for epoch in range(epochs):
+        
+        # Shuffle the data
+        indices = np.random.permutation(len(train_images))
+        train_labels = np.array(train_labels)[indices]  # <- fix
+        train_images = train_images[indices]
+        #train_labels = train_labels[indices]
+        
         start_time = time.time()
         total_loss = 0.0
         correct = 0

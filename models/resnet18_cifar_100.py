@@ -4,6 +4,8 @@ from modules.flatten import Flatten
 from modules.dense import Dense
 from modules.softmax import Softmax
 from modules.avgpool2d import GlobalAvgPool2D
+from modules.batchnorm import BatchNorm2D
+
 import time
 class BasicBlock:
     def __init__(self, in_channels, out_channels, stride=1, conv_algo=0):
@@ -12,12 +14,15 @@ class BasicBlock:
         self.stride = stride
 
         self.conv1 = Conv2D(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, conv_algo=conv_algo)
+        self.batchnorm1 = BatchNorm2D(out_channels)
         self.relu1 = ReLU()
         self.conv2 = Conv2D(out_channels, out_channels, kernel_size=3, stride=1, padding=1, conv_algo=conv_algo)
+        self.batchnorm2 = BatchNorm2D(out_channels)
         self.relu2 = ReLU()
 
         if self.use_projection:
             self.projection = Conv2D(in_channels, out_channels, kernel_size=1, stride=stride, padding=0, conv_algo=conv_algo)
+            self.batchnorm_proj = BatchNorm2D(out_channels)
         else:
             self.projection = None
         self.first=True
@@ -34,6 +39,7 @@ class BasicBlock:
             print(f"Layer: {self.conv1.__class__.__name__}, Time: {layer_time:.4f}s, Performance: {images_per_second:.2f} images/sec")
 
         layer_start_time = time.time()  # Start timer for the layer
+        out = self.batchnorm1.forward(out)
         out = self.relu1.forward(out)
         layer_time = time.time() - layer_start_time
         images_per_second = imgs / layer_time
@@ -43,6 +49,7 @@ class BasicBlock:
         layer_start_time = time.time()  # Start timer for the layer
         out = self.conv2.forward(out)
         layer_time = time.time() - layer_start_time
+        out = self.batchnorm2.forward(out)
         images_per_second = imgs / layer_time
         if self.first:
             print(f"Layer: {self.conv2.__class__.__name__}, Time: {layer_time:.4f}s, Performance: {images_per_second:.2f} images/sec")
@@ -52,6 +59,7 @@ class BasicBlock:
             identity = self.projection.forward(x)
             layer_time = time.time() - layer_start_time
             images_per_second = imgs / layer_time
+            identity = self.batchnorm_proj.forward(identity)
             if self.first:
                 print(f"Layer: {self.projection.__class__.__name__}, Time: {layer_time:.4f}s, Performance: {images_per_second:.2f} images/sec")
         else:
@@ -72,16 +80,19 @@ class BasicBlock:
 
         # Save original inputs and projection if needed
         if self.use_projection:
+
             identity = self.projection.forward(self.input)
         else:
             identity = self.input
-
-        grad_main = self.conv2.backward(grad, learning_rate)
+        grad_main = self.batchnorm2.backward(grad, learning_rate)
+        grad_main = self.conv2.backward(grad_main, learning_rate)
         grad_main = self.relu1.backward(grad_main, learning_rate)
+        grad_main = self.batchnorm1.backward(grad_main, learning_rate)
         grad_main = self.conv1.backward(grad_main, learning_rate)
 
         if self.use_projection:
-            grad_proj = self.projection.backward(grad, learning_rate)
+            grad_proj = self.batchnorm_proj.backward(grad, learning_rate)
+            grad_proj = self.projection.backward(grad_proj, learning_rate)
         else:
             grad_proj = grad
 
@@ -96,6 +107,7 @@ class ResNet18_CIFAR100:
 
         # Initial conv
         self.layers.append(Conv2D(3, 64, kernel_size=3, stride=1, padding=1, conv_algo=conv_algo))
+        self.layers.append(BatchNorm2D(64))
         self.layers.append(ReLU())
 
         # Residual blocks
