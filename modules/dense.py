@@ -4,11 +4,23 @@ from modules.layer import Layer
 import numpy as np
 
 class Dense(Layer):
-    def __init__(self, in_features, out_features):
+    def __init__(self, in_features, out_features,weight_init="he"):
         self.in_features = in_features
         self.out_features = out_features
-        self.weights = np.random.randn(in_features, out_features).astype(np.float32) * (1 / in_features**0.5)
-        self.biases = np.zeros(out_features,dtype=np.float32)
+
+        if weight_init == "he":
+            std = np.sqrt(2.0 / in_features)
+            self.weights = np.random.randn(in_features, out_features).astype(np.float32) * std
+        elif weight_init == "xavier":
+            std = np.sqrt(2.0 / (in_features + out_features))
+            self.weights = np.random.randn(in_features, out_features).astype(np.float32) * std
+        elif weight_init == "custom":
+            self.weights = np.zeros((in_features, out_features), dtype=np.float32)
+        else:
+            self.weights = np.random.randn(in_features, out_features).astype(np.float32) * (1 / in_features**0.5)
+
+        self.biases = np.zeros(out_features, dtype=np.float32)
+
         self.input = None
 
     def forward(self, input, training=True):  # input: [batch_size x in_features]

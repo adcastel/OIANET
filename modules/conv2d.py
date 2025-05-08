@@ -5,7 +5,7 @@ from cython_modules.im2col import im2col_forward_cython
 import numpy as np
 
 class Conv2D(Layer):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, conv_algo=0):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, conv_algo=0, weight_init="he"):
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size
@@ -17,6 +17,25 @@ class Conv2D(Layer):
             self.mode = 'im2col' # 'direct' or 'im2col'
         else:
             self.mode = 'fused' # 'direct' or 'im2col'
+        
+        fan_in = in_channels * kernel_size * kernel_size
+        fan_out = out_channels * kernel_size * kernel_size
+
+        if weight_init == "he":
+            std = np.sqrt(2.0 / fan_in)
+            self.kernels = np.random.randn(out_channels, in_channels, kernel_size, kernel_size).astype(np.float32) * std
+        elif weight_init == "xavier":
+            std = np.sqrt(2.0 / (fan_in + fan_out))
+            self.kernels = np.random.randn(out_channels, in_channels, kernel_size, kernel_size).astype(np.float32) * std
+        elif weight_init == "custom":
+            self.kernels = np.zeros((out_channels, in_channels, kernel_size, kernel_size), dtype=np.float32)
+        else:
+            self.kernels = np.random.uniform(-0.1, 0.1, 
+                          (out_channels, in_channels, kernel_size, kernel_size)).astype(np.float32)
+        
+
+        self.biases = np.zeros(out_channels, dtype=np.float32)
+
         self.mc = 480
         self.nc = 3072
         self.kc = 384
@@ -25,9 +44,6 @@ class Conv2D(Layer):
         self.Ac = np.empty((self.mc, self.kc), dtype=np.float32)
         self.Bc = np.empty((self.kc, self.nc), dtype=np.float32)
 
-        self.kernels = np.random.uniform(-0.1, 0.1, 
-                          (out_channels, in_channels, kernel_size, kernel_size)).astype(np.float32)
-        self.biases = np.zeros(out_channels, dtype=np.float32)
 
     def get_weights(self):
         return {'kernels': self.kernels, 'biases': self.biases}
