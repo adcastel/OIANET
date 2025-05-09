@@ -1,4 +1,6 @@
 /checkpoints
-/data
+/data/cifar-100-python
+/data/cifar-100-python.tar.gz
+/data/__pycache__/
 /saved_models
-__pycache__
+/modules/__pycache__/

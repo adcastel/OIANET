@@ -19,7 +19,7 @@ def evaluate(model, test_images, test_labels,save_path,load_model=True):
     for i in range(total):
         output = test_images[i:i+1]  # [1 x ...]
        
-        output = model.forward(output, curr_iter=i)
+        output = model.forward(output, curr_iter=i,training=False)
 
         predicted = np.argmax(output[0])
         actual = np.argmax(test_labels[i])

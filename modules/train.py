@@ -68,7 +68,7 @@ def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_
             batch_labels = train_labels[i:i+batch_size]
 
             # Forward
-            output = model.forward(batch_images, curr_iter=99)
+            output = model.forward(batch_images, curr_iter=99,training=True)
 
             # Loss + gradient
             loss, grad = compute_loss_and_gradient(output, batch_labels)
