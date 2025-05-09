@@ -6,6 +6,7 @@ from modules.dense import Dense
 from modules.softmax import Softmax
 from models.basemodel import BaseModel
 from modules.batchnorm import BatchNorm2D
+from modules.dropout import Dropout
 
 
 class OIANET_CIFAR100(BaseModel):
@@ -30,6 +31,8 @@ class OIANET_CIFAR100(BaseModel):
             Flatten(),
             Dense(128 * 4 * 4, 256),
             ReLU(),
+            Dropout(0.5),  # Dropout layer with 50% probability
+
             Dense(256, 100),
             Softmax()
         ]

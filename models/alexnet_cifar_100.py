@@ -5,6 +5,7 @@ from modules.flatten import Flatten
 from modules.dense import Dense
 from modules.softmax import Softmax
 from modules.batchnorm import BatchNorm2D
+from modules.dropout import Dropout
 from models.basemodel import BaseModel
 
 class AlexNet_CIFAR100(BaseModel): 
@@ -37,9 +38,11 @@ class AlexNet_CIFAR100(BaseModel):
          layers.append(Flatten())
          layers.append(Dense(256 * 4 * 4, 1024))
          layers.append(ReLU())
+         layers.append(Dropout(0.5))  # Dropout layer with 50% probability
          
          layers.append(Dense(1024, 512))
          layers.append(ReLU())
+         layers.append(Dropout(0.5))  # Dropout layer with 50% probability
          layers.append(Dense(512, 100))  # 100 classes for CIFAR-100
          layers.append(Softmax())
 
