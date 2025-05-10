@@ -15,9 +15,9 @@ class Dropout(Layer):
             return x  # No dropout during inference
 
     def backward(self, grad_output, learning_rate=None):
-        if self.training:
-            return grad_output * self.mask / (1.0 - self.p)
-        else:
-            return grad_output
+#        if self.training:
+        return grad_output * self.mask / (1.0 - self.p)
+#        else:
+#            return grad_output
 
     
