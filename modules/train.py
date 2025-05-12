@@ -50,6 +50,8 @@ def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_
     else:
         print("Training from scratch.")
 
+    old_acc, _ = evaluate(model, test_images, test_labels, save_path=save_path, load_model=False)
+    print("Starting with accuracy of ", old_acc)
     for epoch in range(epochs):
         
         # Shuffle the data
