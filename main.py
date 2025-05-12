@@ -6,6 +6,7 @@ from models.oianet_cifar100 import OIANET_CIFAR100
 from modules.train import train
 from modules.eval import evaluate
 from modules.performance import perf
+from data.cifar100_augmentator import CIFAR100Augmentor
 
 def main(model_name, batch_size, epochs, learning_rate, conv_algo, performance, eval_only):
     (train_images, train_labels), (test_images, test_labels) = load_cifar100(data_dir='./data/cifar-100-python')
@@ -14,6 +15,7 @@ def main(model_name, batch_size, epochs, learning_rate, conv_algo, performance, 
     train_labels = one_hot_encode(train_labels)
     test_labels = one_hot_encode(test_labels)
 
+    augmentor = CIFAR100Augmentor(crop_padding=4, flip_prob=0.5, noise_std=0.01)
     # Build and train model
     if model_name == 'AlexNet':
         model = AlexNet_CIFAR100(conv_algo=conv_algo)
@@ -29,7 +31,7 @@ def main(model_name, batch_size, epochs, learning_rate, conv_algo, performance, 
     else:
         if eval_only == False:
             train(model, train_images, train_labels, epochs=epochs, batch_size=batch_size, learning_rate=learning_rate,
-              save_path=f'saved_models/{model_name}', resume=True, test_images=test_images, test_labels=test_labels)
+              save_path=f'saved_models/{model_name}', resume=True, test_images=test_images, test_labels=test_labels, augmentor=augmentor)
         else:
             _,_ = evaluate(model, test_images, test_labels, save_path=f'saved_models/{model_name}')
 

@@ -38,20 +38,22 @@ import time
 
 
 def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_rate=0.01,
-          save_path='saved_models', resume=False, test_images=None, test_labels=None):
+          save_path='saved_models', resume=False, test_images=None, test_labels=None,augmentor=None):
     old_acc = 0.0
     no_improv = 0
     num_samples = len(train_images)
     epoch = 0
 
+
     if resume and os.path.exists(save_path):
         print(f"Resuming training from {save_path} ...")
         model.load_weights(save_path)
+        old_acc, _ = evaluate(model, test_images, test_labels, save_path=save_path, load_model=False)
     else:
         print("Training from scratch.")
 
-    old_acc, _ = evaluate(model, test_images, test_labels, save_path=save_path, load_model=False)
     print("Starting with accuracy of ", old_acc)
+
     for epoch in range(epochs):
         
         # Shuffle the data
@@ -68,6 +70,8 @@ def train(model, train_images, train_labels, epochs=10, batch_size=64, learning_
         for i in range(0, num_samples, batch_size):
             batch_images = train_images[i:i+batch_size]
             batch_labels = train_labels[i:i+batch_size]
+            if augmentor is not None:
+                batch_images = augmentor.augment_batch(batch_images)
 
             # Forward
             output = model.forward(batch_images, curr_iter=99,training=True)

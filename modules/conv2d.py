@@ -265,7 +265,6 @@ class Conv2D(Layer):
         # Flatten batch into columns: B * HW
         fused_HW = B * HW
         fused_cols = self.cols.transpose(1, 0, 2).reshape(Ck2, fused_HW)
-
         # Output will be [OC, B * HW]
         output = np.zeros((OC, fused_HW), dtype=np.float32)
 
@@ -299,7 +298,7 @@ class Conv2D(Layer):
         for i in range(OC):
             for j in range(fused_HW):
                 output[i][j] = output[i][j] + self.biases[i]
-        
+
         # Reshape back: [OC, B, HW] → [B, OC, OH, OW]
         output = output.reshape(OC, B, HW).transpose(1, 0, 2)
         out_h = (input.shape[2] - self.kernel_size + 2 * self.padding) // self.stride + 1
