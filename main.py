@@ -10,6 +10,7 @@ from data.cifar100_augmentator import CIFAR100Augmentor
 
 def main(model_name, batch_size, epochs, learning_rate, conv_algo, performance, eval_only):
     (train_images, train_labels), (test_images, test_labels) = load_cifar100(data_dir='./data/cifar-100-python')
+    
     train_images = normalize_images(train_images)
     test_images = normalize_images(test_images)
     train_labels = one_hot_encode(train_labels)

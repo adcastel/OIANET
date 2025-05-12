@@ -35,7 +35,11 @@ def load_cifar100(data_dir='cifar-100-python'):
     return (train_images, train_labels), (test_images, test_labels)
 
 def normalize_images(images):
-    return images / 255.0
+    mean = np.array([0.5071, 0.4867, 0.4408]).reshape(1, 3, 1, 1).astype(np.float32)
+    std = np.array([0.2675, 0.2565, 0.2761]).reshape(1, 3, 1, 1).astype(np.float32)
+    images = (images - mean) / std
+    return images
+    #return images / 255.0
 
 def one_hot_encode(labels, num_classes=100):
     one_hot = [[0] * num_classes for _ in range(len(labels))]
