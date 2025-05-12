@@ -294,10 +294,12 @@ class Conv2D(Layer):
         #        output[i][j] = output[i][j] + self.biases[i]
 
         # Numpy GEMM 
-        output += kernel_matrix @ fused_cols
-        for i in range(OC):
-            for j in range(fused_HW):
-                output[i][j] = output[i][j] + self.biases[i]
+        
+        output += kernel_matrix @ fused_cols + self.biases.reshape(OC, 1)  # [OC, B*HW]
+   
+        #for i in range(OC):
+        #    for j in range(fused_HW):
+        #        output[i][j] = output[i][j] + self.biases[i]
 
         # Reshape back: [OC, B, HW] → [B, OC, OH, OW]
         output = output.reshape(OC, B, HW).transpose(1, 0, 2)
