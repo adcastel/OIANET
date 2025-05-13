@@ -5,6 +5,6 @@
 /saved_models
 /modules/__pycache__/
 .ds_store
-models/__pycache__/alexnet_cifar_100.cpython-312.pyc
-models/__pycache__/oianet_cifar100.cpython-312.pyc
-models/__pycache__/*
+/models/__pycache__/alexnet_cifar_100.cpython-312.pyc
+/models/__pycache__/oianet_cifar100.cpython-312.pyc
+/models/__pycache__/*
