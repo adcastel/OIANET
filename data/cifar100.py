@@ -40,8 +40,8 @@ def normalize_images(train_images,test_images):
     train_images = train_images.astype(np.float32) / 255.0
     test_images = test_images.astype(np.float32) / 255.0
     
-    mean = np.mean(train_images, axis=(0, 2, 3), keepdims=True)
-    std = np.std(train_images, axis=(0, 2, 3), keepdims=True) + 1e-7
+    mean = np.mean(train_images, axis=(0, 2, 3), keepdims=True).astype(np.float32)
+    std = np.std(train_images, axis=(0, 2, 3), keepdims=True).astype(np.float32) + 1e-7
     
     # Normalize both datasets
     train_images = (train_images - mean) / std
