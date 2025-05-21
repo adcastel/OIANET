@@ -38,11 +38,11 @@ class AlexNet_CIFAR100(BaseModel):
          layers.append(Flatten())
          layers.append(Dense(256 * 4 * 4, 1024))
          layers.append(ReLU())
-         layers.append(Dropout(0.5))  # Dropout layer with 50% probability
+         layers.append(Dropout(0.0))  # Dropout layer with 50% probability
          
          layers.append(Dense(1024, 512))
          layers.append(ReLU())
-         layers.append(Dropout(0.5))  # Dropout layer with 50% probability
+         layers.append(Dropout(0.0))  # Dropout layer with 50% probability
          layers.append(Dense(512, 100))  # 100 classes for CIFAR-100
          layers.append(Softmax())
 

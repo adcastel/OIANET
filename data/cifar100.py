@@ -10,7 +10,7 @@ def download_and_extract_cifar100(data_dir='cifar-100-python'):
         filename = url.split('/')[-1]
         urllib.request.urlretrieve(url, filename)
         with tarfile.open(filename, 'r:gz') as tar:
-            tar.extractall()
+            tar.extractall(path='./data')
         os.remove(filename)
 
 def load_cifar100_batch(file):
@@ -37,15 +37,16 @@ def load_cifar100(data_dir='cifar-100-python'):
 def normalize_images(train_images,test_images):
     #mean = np.array([0.5071, 0.4867, 0.4408]).reshape(1, 3, 1, 1).astype(np.float32)
     #std = np.array([0.2675, 0.2565, 0.2761]).reshape(1, 3, 1, 1).astype(np.float32)
+
     train_images = train_images.astype(np.float32) / 255.0
     test_images = test_images.astype(np.float32) / 255.0
     
-    mean = np.mean(train_images, axis=(0, 2, 3), keepdims=True).astype(np.float32)
-    std = np.std(train_images, axis=(0, 2, 3), keepdims=True).astype(np.float32) + 1e-7
+    #mean = np.mean(train_images, axis=(0, 2, 3), keepdims=True).astype(np.float32)
+    #std = np.std(train_images, axis=(0, 2, 3), keepdims=True).astype(np.float32) + 1e-7
     
     # Normalize both datasets
-    train_images = (train_images - mean) / std
-    test_images = (test_images - mean) / std
+    #train_images = (train_images - mean) / std
+    #test_images = (test_images - mean) / std
 
     return train_images, test_images
 

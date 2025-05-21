@@ -7,7 +7,7 @@ from modules.softmax import Softmax
 from modules.avgpool2d import GlobalAvgPool2D
 from models.basemodel import BaseModel
 from modules.batchnorm import BatchNorm2D
-
+from modules.dropout import Dropout
 
 class TinyCNN(BaseModel):
     def __init__(self, conv_algo=0):
@@ -22,6 +22,7 @@ class TinyCNN(BaseModel):
             GlobalAvgPool2D(),
             Flatten(),
             Dense(64, 100),  # Output layer for 100 classes
+            Dropout(0.5),  # Dropout layer with 50% probability
             Softmax()
         ]
         super().__init__(layers)

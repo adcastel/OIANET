@@ -31,7 +31,7 @@ class OIANET_CIFAR100(BaseModel):
             Flatten(),
             Dense(128 * 4 * 4, 256),
             ReLU(),
-            Dropout(0.5),  # Dropout layer with 50% probability
+            Dropout(0.0),  # Dropout layer with 50% probability
 
             Dense(256, 100),
             Softmax()

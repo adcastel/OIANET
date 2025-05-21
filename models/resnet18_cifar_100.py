@@ -131,7 +131,7 @@ class ResNet18_CIFAR100:
             self.layers.append(block)
             in_channels = out_channels  # For next block
 
-    def forward(self, x, curr_iter=1):
+    def forward(self, x, curr_iter=1,training=False):
         for layer in self.layers:
             layer_start_time = time.time()  # Start timer for the layer
             x = layer.forward(x)
